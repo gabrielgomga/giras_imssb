@@ -397,7 +397,7 @@ giras_od <- giras_od %>%
 curvas_sf <- curvas_sf %>%
   select(-geometry_origen)
 
-mapview(curvas_sf)
+# mapview(curvas_sf)
 
 curvas_df <- st_drop_geometry(curvas_sf)
 
