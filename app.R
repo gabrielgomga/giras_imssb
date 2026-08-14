@@ -3,11 +3,6 @@ library("pacman")
 p_load (dplyr,tidyverse,sf,s2,sp,leaflet,leaflet.extras,leafem,mapview,deldir,rlang, writexl, htmlwidgets, arrow,
         hereR,classInt,readr,readxl, tidyr, scales, janitor, mapview, purrr, stringr, osrm, nngeo, geosphere, shiny, rsconnect)
 
-setwd("C:/Users/gabriel.gomez/IMSS-BIENESTAR/División de Procesamiento de información - Comando Florence Nightingale/Proyectos/106_Giras_DG_IMSSB")
-getwd()
-
-# shiny::addResourcePath("", file.path(getwd(), "www"))
-
 giras <- read_excel("Insumos/giras2026 por CLUES.xlsx", 
                     col_types = c("date", rep("text", 8)), n_max = 43) %>% clean_names()
 cat_clues <- arrow::read_parquet("Insumos/clues.parquet") %>% clean_names()
@@ -430,11 +425,6 @@ icon_no_visitas <- makeIcon(
 
 
 
-
-
-
-
-
 # Left left  --------------------------------------------------------------
 
 # leaflet(giras_clues) %>%
@@ -800,17 +790,4 @@ server <- function(input, output, session) {
 }
 
 shinyApp(ui, server)
- 
-# shiny::runApp(
-#   "C:/Users/gabriel.gomez/IMSS-BIENESTAR/División de Procesamiento de información - Comando Florence Nightingale/Proyectos/106_Giras_DG_IMSSB",
-#   launch.browser = TRUE
-# )
 
-
-# library(httr) 
-# httr::set_config(httr::verbose()) 
-# 
-# rsconnect::deployApp()
-# 
-# rlang::last_trace()
-# rlang::last_trace(drop = FALSE)
