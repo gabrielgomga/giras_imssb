@@ -1,7 +1,7 @@
 library("pacman")
 
 p_load (dplyr,tidyverse,sf,s2,sp,leaflet,leaflet.extras,leafem,mapview,deldir,rlang, writexl, htmlwidgets, arrow,
-        hereR,classInt,readr,readxl, tidyr, scales, janitor, mapview, purrr, stringr, osrm, nngeo, geosphere, shiny, rsconnect)
+        hereR,classInt,readr,readxl, tidyr, scales, janitor, mapview, purrr, stringr, osrm, nngeo, geosphere, shiny, rsconnect, DT)
 
 giras <- read_excel("Insumos/giras2026 por CLUES.xlsx", 
                     col_types = c("date", rep("text", 8)), n_max = 43) %>% clean_names()
@@ -423,7 +423,24 @@ icon_campa <- makeIcon(
 icon_no_visitas <- makeIcon(
   iconUrl = "Iconos/cruz_gris_claro.svg", iconWidth = 10, iconHeight = 10)
 
-
+# Simbología del mapa
+legend_html <- paste0(
+  "<div style='background:white; padding:10px 12px; border-radius:6px; ",
+  "box-shadow:0 0 6px rgba(0,0,0,0.3); font-size:13px; line-height:22px;'>",
+  "<b>Simbología</b><br>",
+  "<img src='", base64enc::dataURI(file = "Iconos/cruz_roja.svg", mime = "image/svg+xml"),
+  "' width='13' height='13'> Dirección General<br>",
+  "<img src='", base64enc::dataURI(file = "Iconos/cruz_verde.svg", mime = "image/svg+xml"),
+  "' width='12' height='12'> Hospital<br>",
+  "<img src='", base64enc::dataURI(file = "Iconos/gobierno_verde.svg", mime = "image/svg+xml"),
+  "' width='16' height='16'> Edificio de Gobierno<br>",
+  "<img src='", base64enc::dataURI(file = "Iconos/construction_verde.svg", mime = "image/svg+xml"),
+  "' width='16' height='16'> Obra<br>",
+  "<hr style='margin:6px 0;'>",
+  "<span style='display:inline-block; width:16px; height:3px; background:#A57F2C; margin-right:6px;'></span> Ruta de visita<br>",
+  "<span style='display:inline-block; width:16px; height:2px; background:#3B3A3A; margin-right:6px;'></span> Límite de entidad",
+  "</div>"
+)
 
 # Left left  --------------------------------------------------------------
 
@@ -500,17 +517,17 @@ ui <- fluidPage(
     style = "
       background-color:#691C32;
       color:white;
-      padding:15px;
+      padding:10px;
       border-radius:6px;
-      margin-bottom:15px;
+      margin-bottom:10px;
       text-align:center;
     ",
 
-    h2("Giras de Trabajo IMSS-BIENESTAR 2026"),
+    h2("Giras de Trabajo IMSS-BIENESTAR 2026", style = "margin:0; font-size:24px;"),
 
     p(
       "Seguimiento de visitas, recorridos y actividades de la Dirección General",
-      style = "font-size:16px; margin-bottom:0;"
+      style = "font-size:14px; margin-bottom:0;"
     )
 
   ),
@@ -546,15 +563,7 @@ ui <- fluidPage(
       
       uiOutput("distancia_total"),
       
-      div(
-        style = "
-    height:700px;
-    overflow-y:auto;
-    border:1px solid #ddd;
-    border-radius:5px;
-  ",
-        tableOutput("visitas")
-      ),
+      DT::dataTableOutput("visitas"),
       
       tags$br(), ### A partir de aquí comienza el logo
 
@@ -574,7 +583,7 @@ ui <- fluidPage(
     column(
       width = 9,
 
-      leafletOutput("mapa", height = "90vh")
+      leafletOutput("mapa", height = "calc(100vh - 130px)")
 
     )
 
@@ -702,19 +711,18 @@ server <- function(input, output, session) {
         data = campa,
         icon = icon_campa,
         popup = ~nombre_de_la_unidad
-        ) 
+      ) %>% addControl(
+        html = legend_html,
+        position = "bottomleft"
+      )
   })
   
-  output$visitas <- renderTable({
+  output$visitas <- DT::renderDataTable({
     
-    datos <- giras_filtradas()
-    
-    datos %>%
+    datos <- giras_filtradas() %>%
       arrange(fecha, orden_visita) %>%
       st_drop_geometry() %>%
-      mutate(
-        Fecha = format(fecha, "%d/%m/%Y")
-      ) %>%
+      mutate(Fecha = format(fecha, "%d/%m/%Y")) %>%
       select(
         Fecha,
         "Orden de visita" = orden_visita,
@@ -722,6 +730,23 @@ server <- function(input, output, session) {
         "Objetivo de la visita" = objetivo
       )
     
+    DT::datatable(
+      datos,
+      rownames = FALSE,
+      class = "compact stripe hover",
+      options = list(
+        dom = "t",
+        paging = FALSE,
+        scrollY = "45vh",
+        scrollX = TRUE,
+        columnDefs = list(
+          list(width = "70px", targets = 0),
+          list(width = "50px", targets = 1),
+          list(width = "160px", targets = 2),
+          list(width = "220px", targets = 3)
+        )
+      )
+    )
   })
   
   output$distancia_total <- renderUI({
