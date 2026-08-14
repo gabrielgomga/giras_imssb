@@ -749,7 +749,7 @@ server <- function(input, output, session) {
       options = list(
         dom = "t",
         paging = FALSE,
-        scrollY = "38vh",
+        scrollY = "35vh",
         scrollX = TRUE,
         columnDefs = list(
           list(width = "70px", targets = 0),
