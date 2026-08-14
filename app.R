@@ -512,6 +512,18 @@ legend_html <- paste0(
 # Comenzar con Shiny para mapa --------------------------------------------
 ui <- fluidPage(
   
+  tags$head(
+    tags$style(HTML("
+      #visitas table.dataTable {
+        font-size: 12px;
+      }
+      #visitas table.dataTable th,
+      #visitas table.dataTable td {
+        padding: 4px 6px !important;
+      }
+    "))
+  ),
+  
   # Encabezado
   div(
     style = "
@@ -737,7 +749,7 @@ server <- function(input, output, session) {
       options = list(
         dom = "t",
         paging = FALSE,
-        scrollY = "45vh",
+        scrollY = "38vh",
         scrollX = TRUE,
         columnDefs = list(
           list(width = "70px", targets = 0),
